@@ -9,7 +9,7 @@ export enum ProbeType {
 }
 
 export enum ProbeState {
-  IDLE = 'Idle',
+  IDLE = 'Waiting',
   ERASING = 'Erasing',
   FLASHING = 'Flashing',
   SUCCESS = 'Success',
@@ -31,11 +31,11 @@ export interface ProbeStateColor {
 
 export const Probe = (status: ProbeStatus): JSX.Element => {
   const stateColorLut: ProbeStateColor[] = [
-    { state: ProbeState.IDLE, color: 'lightgrey' },
-    { state: ProbeState.ERASING, color: 'orange' },
+    { state: ProbeState.IDLE, color: 'orange' },
+    { state: ProbeState.ERASING, color: 'burlywood' },
     { state: ProbeState.FLASHING, color: 'lightblue' },
     { state: ProbeState.SUCCESS, color: 'yellowgreen' },
-    { state: ProbeState.ERROR, color: 'red' },
+    { state: ProbeState.ERROR, color: 'orangered' },
   ];
 
   const color = stateColorLut.find((obj) => {
