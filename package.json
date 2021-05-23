@@ -10,7 +10,7 @@
     "tauri": "tauri"
   },
   "author": "Jackson Ming Hu <huming2207@gmail.com>",
-  "license": "ISC",
+  "license": "GPL-3.0",
   "dependencies": {
     "@chakra-ui/icons": "^1.0.13",
     "@chakra-ui/react": "^1.6.2",
