@@ -3,6 +3,8 @@
   windows_subsystem = "windows"
 )]
 
+mod handlers;
+
 fn main() {
   tauri::Builder::default()
     .run(tauri::generate_context!())
