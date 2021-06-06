@@ -3,8 +3,6 @@ const path = require('path');
 const ReactRefreshPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
-const portFinderSync = require('portfinder-sync');
-const port = portFinderSync.getPort(5000);
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 
 module.exports = merge(common, {
@@ -14,7 +12,7 @@ module.exports = merge(common, {
     historyApiFallback: true,
     compress: true,
     host: '127.0.0.1',
-    port: port,
+    port: 5000,
     disableHostCheck: true,
     contentBase: path.join(__dirname, 'public'),
   },
