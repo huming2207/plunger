@@ -46,6 +46,8 @@ module.exports = {
   ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    modules: [path.join(__dirname, './node_modules')],
     fallback: { stream: require.resolve('stream-browserify') },
   },
+  target: 'electron-renderer',
 };
