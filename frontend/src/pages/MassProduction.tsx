@@ -1,12 +1,15 @@
 import { SimpleGrid, VStack } from '@chakra-ui/layout';
 import { Button, ButtonGroup, Container } from '@chakra-ui/react';
-import { Observer } from 'mobx-react';
+import { ipcRenderer } from 'electron';
+import { Observer } from 'mobx-react-lite';
 import React from 'react';
+import { MessageChannel } from '../common/MessageTypes';
 import { MassProdStat } from '../components/MassProdStat';
 import { Probe } from '../components/Probe';
 import { ProbeStateInstance } from '../states/ProbeState';
 
 export const MassProduction = (): JSX.Element => {
+  const probeState = ProbeStateInstance;
   return (
     <>
       <VStack>
@@ -34,6 +37,17 @@ export const MassProduction = (): JSX.Element => {
           centerContent
         >
           <ButtonGroup variant="solid" spacing="10">
+            <Button
+              colorScheme="blue"
+              size="lg"
+              onClick={async () => {
+                const result = await ipcRenderer.invoke(MessageChannel.PROBE_DETECT_REQUEST);
+                console.log(result);
+                ProbeStateInstance.setConnectedProbe(result);
+              }}
+            >
+              Scan Probe
+            </Button>
             <Button colorScheme="green" size="lg">
               Start
             </Button>
@@ -48,7 +62,7 @@ export const MassProduction = (): JSX.Element => {
             <Observer>
               {() => (
                 <>
-                  {ProbeStateInstance.connectedProbes.map((device) => {
+                  {probeState.connectedProbes.slice().map((device) => {
                     return (
                       <div key={device.info.shortId}>
                         <Probe {...device} />
