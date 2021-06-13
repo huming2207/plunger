@@ -1,5 +1,5 @@
-import { Divider, SimpleGrid, StackDivider, VStack } from '@chakra-ui/layout';
-import { Box, Button, ButtonGroup, Container } from '@chakra-ui/react';
+import { SimpleGrid, VStack } from '@chakra-ui/layout';
+import { Button, ButtonGroup, Container } from '@chakra-ui/react';
 import React from 'react';
 import { MassProdStat } from '../components/MassProdStat';
 import { Probe, ProbeState, ProbeType } from '../components/Probe';
