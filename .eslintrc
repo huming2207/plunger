@@ -16,5 +16,10 @@
     "no-empty-function": 0,
     "@typescript-eslint/no-empty-function": 0,
     "prettier/prettier": "error"
+  },
+  "settings": {
+    "react": {
+        "version": "detect"
+    }
   }
 }

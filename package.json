@@ -29,6 +29,6 @@
     "typescript": "^4.3.2"
   },
   "dependencies": {
-    "plunger-binding": "^1.0.1"
+    "plunger-binding": "^1.0.5"
   }
 }
