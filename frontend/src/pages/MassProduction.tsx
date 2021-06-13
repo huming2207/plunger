@@ -1,8 +1,10 @@
 import { SimpleGrid, VStack } from '@chakra-ui/layout';
 import { Button, ButtonGroup, Container } from '@chakra-ui/react';
+import { Observer } from 'mobx-react';
 import React from 'react';
 import { MassProdStat } from '../components/MassProdStat';
-import { Probe, ProbeState, ProbeType } from '../components/Probe';
+import { Probe } from '../components/Probe';
+import { ProbeStateInstance } from '../states/ProbeState';
 
 export const MassProduction = (): JSX.Element => {
   return (
@@ -43,17 +45,19 @@ export const MassProduction = (): JSX.Element => {
 
         <Container maxW="container.md" marginTop="5">
           <SimpleGrid columns={2} spacing={10}>
-            <Probe busNumber={1} portNumber={2} type={ProbeType.DAPLINK} state={ProbeState.ERASING} />
-
-            <Probe busNumber={1} portNumber={3} type={ProbeType.DAPLINK} state={ProbeState.IDLE} />
-
-            <Probe busNumber={1} portNumber={4} type={ProbeType.DAPLINK} state={ProbeState.SUCCESS} />
-
-            <Probe busNumber={1} portNumber={5} type={ProbeType.DAPLINK} state={ProbeState.ERROR} />
-
-            <Probe busNumber={1} portNumber={6} type={ProbeType.DAPLINK} state={ProbeState.FLASHING} />
-
-            <Probe busNumber={1} portNumber={7} type={ProbeType.DAPLINK} state={ProbeState.FLASHING} />
+            <Observer>
+              {() => (
+                <>
+                  {ProbeStateInstance.connectedProbes.map((device) => {
+                    return (
+                      <div key={device.info.shortId}>
+                        <Probe {...device} />
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </Observer>
           </SimpleGrid>
         </Container>
       </VStack>
