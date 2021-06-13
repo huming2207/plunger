@@ -10,6 +10,8 @@ export interface ProbeUIColor {
 }
 
 export const Probe = (params: ProbeDevice): JSX.Element => {
+  const shortIdHex = params.info.shortId.toString(16).toUpperCase().padStart(6, '0');
+
   const stateColorLut: ProbeUIColor[] = [
     { status: ProbeStatus.IDLE, color: 'orange' },
     { status: ProbeStatus.ERASING, color: 'burlywood' },
@@ -25,7 +27,7 @@ export const Probe = (params: ProbeDevice): JSX.Element => {
   return (
     <Box border="1px" boxShadow="xl" borderColor="gray.100" borderRadius="md" bg={color ? color.color : 'white'}>
       <Stat marginLeft={5} marginTop={2}>
-        <StatLabel>{`${params.info.probeType}; ID: ${params.info.shortId}`}</StatLabel>
+        <StatLabel>{`${params.info.probeType}; ID: ${shortIdHex}`}</StatLabel>
         <StatNumber>{params.status}</StatNumber>
         <StatHelpText>
           {params.targetChipId ? `Target Chip ID: ${params.targetChipId}` : 'Unknown Chip ID'}
