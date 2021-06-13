@@ -1,14 +1,12 @@
 {
-  "name": "react-esbuild-webpack-template",
+  "name": "plunger-frontend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=development webpack serve --config webpack.dev.js --progress",
     "build": "NODE_ENV=production webpack --config webpack.prod.js --progress",
-    "build-dev": "NODE_ENV=production webpack --config webpack.electrondev.js --progress",
-    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
-    "start-electron": "NODE_ENV=development electron http://localhost:5000"
+    "dev": "NODE_ENV=production webpack --config webpack.dev.js --progress",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
   },
   "author": "Jackson Ming Hu <huming2207@gmail.com>",
   "license": "GPL-3.0",
