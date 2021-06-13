@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
+import { registerHandlers } from './message';
 
 function createWindow() {
   // Create the browser window.
@@ -7,6 +8,8 @@ function createWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: false
     },
     width: 800,
   });
@@ -22,7 +25,9 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+  registerHandlers();
   createWindow();
+  console.log('Started');
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
