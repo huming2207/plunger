@@ -1,6 +1,4 @@
 import { makeAutoObservable } from 'mobx';
-import { ipcRenderer } from 'electron';
-import { MessageChannel } from '../common/MessageTypes';
 import { ProbeDevice, ProbeStatus } from '../common/ProbeTypes';
 import { Probes } from 'plunger-binding';
 

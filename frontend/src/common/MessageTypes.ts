@@ -1,4 +1,4 @@
-export enum MessageChannel {
+export enum InvokeType {
   PROBE_DETECT_REQUEST = 'probe-detect-req',
-  PROBE_DETECT_RESPONSE = 'probe-detect-resp',
+  FW_FILE_OPEN_REQUEST = 'firmware-open-req',
 }
