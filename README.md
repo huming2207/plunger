@@ -2,7 +2,7 @@
 
 Yet Another Microcontroller Mass Production Tool 
 
-Based on **probe-rs** and **tauri**
+Based on **probe-rs** and **electron**
 
 ## License
 
