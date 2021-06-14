@@ -2,14 +2,14 @@ import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import { registerHandlers } from './message';
 
-function createWindow() {
+function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
     },
     width: 800,
   });
@@ -19,14 +19,14 @@ function createWindow() {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+  return mainWindow;
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  registerHandlers();
-  createWindow();
+  registerHandlers(createWindow());
   console.log('Started');
 
   app.on('activate', function () {
