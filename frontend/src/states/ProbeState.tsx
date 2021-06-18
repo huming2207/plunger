@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable, runInAction, toJS } from 'mobx';
 import { ProbeDevice, ProbeStatus } from '../common/ProbeTypes';
 import { Probes } from 'plunger-binding';
 import { identifyTarget } from '../common/MainProcessBindings';
@@ -21,37 +21,27 @@ export class ProbeState {
       return;
     }
 
-    for (const newProbe of probes.probes) {
-      // Clean old probes
-      this.connectedProbes = this.connectedProbes.slice().filter((device) => {
-        for (const newProbe of probes.probes) {
-          if (
-            newProbe.pid === device.info.pid &&
-            newProbe.vid === device.info.vid &&
-            newProbe.serialNum === device.info.serialNum
-          ) {
-            return true;
-          }
-        }
-
-        return false;
-      });
-
-      this.connectedProbes = [...this.connectedProbes, { status: ProbeStatus.IDLE, info: newProbe }];
-    }
-
-    for (const currProbe of this.connectedProbes.slice()) {
+    this.connectedProbes = this.connectedProbes.slice().filter((device) => {
       for (const newProbe of probes.probes) {
-        // Skip existing
         if (
-          newProbe.pid === currProbe.info.pid &&
-          newProbe.vid === currProbe.info.vid &&
-          currProbe.info.serialNum === newProbe.serialNum
+          newProbe.pid === device.info.pid &&
+          newProbe.vid === device.info.vid &&
+          newProbe.serialNum === device.info.serialNum
         ) {
-          continue;
+          return true;
         }
+      }
 
-        // Add new probe
+      return false;
+    });
+
+    for (const newProbe of probes.probes) {
+      console.log('new probe', probes.probes, toJS(this.connectedProbes));
+      if (
+        !toJS(this.connectedProbes).some((e) => {
+          return newProbe.pid === e.info.pid && newProbe.vid === e.info.vid && e.info.serialNum === newProbe.serialNum;
+        })
+      ) {
         this.connectedProbes = [...this.connectedProbes, { status: ProbeStatus.IDLE, info: newProbe }];
       }
     }
