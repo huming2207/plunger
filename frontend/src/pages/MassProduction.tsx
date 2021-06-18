@@ -1,7 +1,8 @@
 import { SimpleGrid, VStack } from '@chakra-ui/layout';
-import { Button, ButtonGroup, Container, Stack, Text } from '@chakra-ui/react';
+import { Button, ButtonGroup, Container, Input, Stack, Text, Tooltip } from '@chakra-ui/react';
 import { OpenDialogReturnValue } from 'electron';
 import { Observer } from 'mobx-react-lite';
+import path from 'path';
 import React from 'react';
 import { useState } from 'react';
 import { listAllProbes, openFirmwareChooseDialog } from '../common/MainProcessBindings';
@@ -38,6 +39,15 @@ export const MassProduction = (): JSX.Element => {
           maxW="container.md"
         >
           <Stack direction="row" spacing={5} align="center">
+            <Text>Target name:</Text>
+            <Input
+              onChange={(event) => {
+                ProbeStateInstance.setTargetName(event.target.value);
+              }}
+              placeholder="e.g. STM32F103C8Tx"
+              width="xs"
+              maxWidth="sm"
+            ></Input>
             <Button
               colorScheme="teal"
               variant="solid"
@@ -45,15 +55,25 @@ export const MassProduction = (): JSX.Element => {
                 setFirmware(await openFirmwareChooseDialog());
               }}
             >
-              Select firmware blob
+              Select firmware
             </Button>
-            <Text fontSize="md">
-              {firmware?.canceled
-                ? 'You have cancelled the selection, try again'
-                : firmware?.filePaths && firmware.filePaths.length > 0
-                ? firmware.filePaths[0]
-                : 'No file selected'}
-            </Text>
+            <Tooltip
+              label={
+                firmware?.canceled
+                  ? 'You have cancelled the selection, try again'
+                  : firmware?.filePaths && firmware.filePaths.length > 0
+                  ? firmware.filePaths[0]
+                  : 'No file selected'
+              }
+            >
+              <Text fontSize="md">
+                {firmware?.canceled
+                  ? 'You have cancelled the selection, try again'
+                  : firmware?.filePaths && firmware.filePaths.length > 0
+                  ? path.basename(firmware.filePaths[0])
+                  : 'No file selected'}
+              </Text>
+            </Tooltip>
           </Stack>
         </Container>
         <Container
@@ -74,6 +94,7 @@ export const MassProduction = (): JSX.Element => {
               onClick={async () => {
                 const result = await listAllProbes();
                 ProbeStateInstance.setConnectedProbe(result);
+                await ProbeStateInstance.refreshTargetInfo();
               }}
             >
               Scan Probe

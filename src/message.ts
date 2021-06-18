@@ -1,9 +1,10 @@
 import { BrowserWindow, dialog, ipcMain } from 'electron';
-import { listAllProbes } from 'plunger-binding';
+import { identifyTarget, listAllProbes } from 'plunger-binding';
 
 export enum InvokeType {
   PROBE_DETECT_REQUEST = 'probe-detect-req',
   FW_FILE_OPEN_REQUEST = 'firmware-open-req',
+  IDENTIFY_REQUEST = 'identify-target-req',
 }
 
 export const registerHandlers = (window: BrowserWindow): void => {
@@ -23,4 +24,11 @@ export const registerHandlers = (window: BrowserWindow): void => {
 
     return result;
   });
+
+  ipcMain.handle(
+    InvokeType.IDENTIFY_REQUEST,
+    async (_event, targetName: string, vid: number, pid: number, serialNum?: string) => {
+      return await identifyTarget(targetName, vid, pid, serialNum);
+    },
+  );
 };

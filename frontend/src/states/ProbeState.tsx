@@ -1,12 +1,18 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { ProbeDevice, ProbeStatus } from '../common/ProbeTypes';
 import { Probes } from 'plunger-binding';
+import { identifyTarget } from '../common/MainProcessBindings';
 
 export class ProbeState {
+  public targetName = 'STM32F103C8Tx';
   public connectedProbes: ProbeDevice[] = [];
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  public setTargetName(targetName: string): void {
+    this.targetName = targetName;
   }
 
   public setConnectedProbe(probes: Probes): void {
@@ -49,6 +55,27 @@ export class ProbeState {
         this.connectedProbes = [...this.connectedProbes, { status: ProbeStatus.IDLE, info: newProbe }];
       }
     }
+  }
+
+  public async refreshTargetInfo(): Promise<void> {
+    if (this.connectedProbes.slice().length < 1) {
+      return;
+    }
+
+    const updatedProbes: ProbeDevice[] = [];
+    for (const probe of this.connectedProbes.slice()) {
+      try {
+        const target = await identifyTarget(this.targetName, probe.info.vid, probe.info.pid, probe.info.serialNum);
+        updatedProbes.push({ status: probe.status, info: probe.info, targetChipId: target.uniqueId });
+      } catch (err) {
+        console.warn(`No target found for probe ${probe.info.shortId}, ${probe.info.serialNum}, error ${err}`);
+        updatedProbes.push({ status: probe.status, info: probe.info, targetChipId: undefined });
+      }
+    }
+
+    runInAction(() => {
+      this.connectedProbes = updatedProbes;
+    });
   }
 }
 
