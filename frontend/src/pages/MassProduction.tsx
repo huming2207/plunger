@@ -99,12 +99,19 @@ export const MassProduction = (): JSX.Element => {
             >
               Scan Probe
             </Button>
-            <Button colorScheme="green" size="lg">
-              Start
-            </Button>
-            <Button colorScheme="orange" size="lg">
-              Stop
-            </Button>
+            <Observer>
+              {() => (
+                <Button
+                  colorScheme={probeState.startState ? 'red' : 'green'}
+                  size="lg"
+                  onClick={() => {
+                    probeState.setStartState(!probeState.startState);
+                  }}
+                >
+                  {probeState.startState ? 'Stop' : 'Start'}
+                </Button>
+              )}
+            </Observer>
           </ButtonGroup>
         </Container>
 

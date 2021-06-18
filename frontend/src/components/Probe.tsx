@@ -14,10 +14,11 @@ export const Probe = (params: ProbeDevice): JSX.Element => {
 
   const stateColorLut: ProbeUIColor[] = [
     { status: ProbeStatus.IDLE, color: 'orange' },
+    { status: ProbeStatus.WAIT, color: 'orangered' },
     { status: ProbeStatus.ERASING, color: 'burlywood' },
     { status: ProbeStatus.FLASHING, color: 'lightblue' },
     { status: ProbeStatus.SUCCESS, color: 'yellowgreen' },
-    { status: ProbeStatus.ERROR, color: 'orangered' },
+    { status: ProbeStatus.ERROR, color: 'red' },
   ];
 
   const color = stateColorLut.find((obj) => {

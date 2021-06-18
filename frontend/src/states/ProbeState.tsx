@@ -1,10 +1,12 @@
-import { makeAutoObservable, runInAction, toJS } from 'mobx';
+import { autorun, makeAutoObservable, runInAction, toJS } from 'mobx';
 import { ProbeDevice, ProbeStatus } from '../common/ProbeTypes';
 import { Probes } from 'plunger-binding';
-import { identifyTarget } from '../common/MainProcessBindings';
+import { eraseTarget, flashFirmwareFile, identifyTarget } from '../common/MainProcessBindings';
 
 export class ProbeState {
   public targetName = 'STM32F103C8Tx';
+  public startState = false;
+  public firmwarePath = '';
   public connectedProbes: ProbeDevice[] = [];
 
   constructor() {
@@ -13,6 +15,14 @@ export class ProbeState {
 
   public setTargetName(targetName: string): void {
     this.targetName = targetName;
+  }
+
+  public setFirmwarePath(path: string): void {
+    this.firmwarePath = path;
+  }
+
+  public setStartState(state: boolean): void {
+    this.startState = state;
   }
 
   public setConnectedProbe(probes: Probes): void {
@@ -56,10 +66,10 @@ export class ProbeState {
     for (const probe of this.connectedProbes.slice()) {
       try {
         const target = await identifyTarget(this.targetName, probe.info.vid, probe.info.pid, probe.info.serialNum);
-        updatedProbes.push({ status: probe.status, info: probe.info, targetChipId: target.uniqueId });
+        updatedProbes.push({ status: ProbeStatus.WAIT, info: probe.info, targetChipId: target.uniqueId });
       } catch (err) {
         console.warn(`No target found for probe ${probe.info.shortId}, ${probe.info.serialNum}, error ${err}`);
-        updatedProbes.push({ status: probe.status, info: probe.info, targetChipId: undefined });
+        updatedProbes.push({ status: ProbeStatus.IDLE, info: probe.info, targetChipId: undefined });
       }
     }
 
@@ -70,3 +80,17 @@ export class ProbeState {
 }
 
 export const ProbeStateInstance = new ProbeState();
+
+export const startFirmwareFlashAutoRun = (): void => {
+  autorun(async () => {
+    if (ProbeStateInstance.startState) {
+      for (const probe of toJS(ProbeStateInstance.connectedProbes)) {
+        try {
+          await eraseTarget(ProbeStateInstance.targetName, probe.info.vid, probe.info.pid, probe.info.serialNum);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    }
+  });
+};
