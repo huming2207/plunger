@@ -3,15 +3,19 @@ import { Button, ButtonGroup, Container, Input, Stack, Text, Tooltip } from '@ch
 import { OpenDialogReturnValue } from 'electron';
 import { Observer } from 'mobx-react-lite';
 import path from 'path';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { listAllProbes, openFirmwareChooseDialog } from '../common/MainProcessBindings';
 import { MassProdStat } from '../components/MassProdStat';
 import { Probe } from '../components/Probe';
-import { ProbeStateInstance } from '../states/ProbeState';
+import { ProbeStateInstance, startFirmwareFlashAutoRun } from '../states/ProbeState';
 
 export const MassProduction = (): JSX.Element => {
   const [firmware, setFirmware] = useState<OpenDialogReturnValue>();
+  useEffect(() => {
+    startFirmwareFlashAutoRun();
+  }, []);
+
   const probeState = ProbeStateInstance;
   return (
     <>
@@ -52,7 +56,12 @@ export const MassProduction = (): JSX.Element => {
               colorScheme="teal"
               variant="solid"
               onClick={async () => {
-                setFirmware(await openFirmwareChooseDialog());
+                const result = await openFirmwareChooseDialog();
+                setFirmware(result);
+                if (!result.canceled) {
+                  probeState.setFirmwarePath(result.filePaths[0]);
+                  probeState.setFirmwareType('bin' as any); // TODO: change to actual type
+                }
               }}
             >
               Select firmware
