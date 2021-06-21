@@ -46,7 +46,7 @@
     "fork-ts-checker-webpack-plugin": "^6.2.10",
     "html-loader": "^2.1.2",
     "html-webpack-plugin": "^5.3.1",
-    "plunger-binding": "^1.0.9",
+    "plunger-binding": "^1.0.10",
     "portfinder-sync": "^0.0.2",
     "prettier": "^2.3.1",
     "react-refresh": "^0.10.0",
