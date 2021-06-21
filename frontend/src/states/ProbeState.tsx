@@ -1,7 +1,7 @@
-import { autorun, makeAutoObservable, runInAction, toJS } from 'mobx';
+import { makeAutoObservable, runInAction, toJS } from 'mobx';
 import { ProbeDevice, ProbeStatus } from '../common/ProbeTypes';
 import { FirmwareType, Probes } from 'plunger-binding';
-import { eraseTarget, flashFirmwareFile, identifyTarget } from '../common/MainProcessBindings';
+import { identifyTarget } from '../common/MainProcessBindings';
 
 export class ProbeState {
   public targetName = 'STM32F103C8Tx';
@@ -33,13 +33,33 @@ export class ProbeState {
   public setProbeStatusByShortId(status: ProbeStatus, shortId: number): void {
     const updatedProbes = toJS(this.connectedProbes).map((probe) => {
       if (probe.info.shortId === shortId) {
-        const newProbe = probe;
-        newProbe.status = status;
-        return newProbe;
+        const updatedProbe = probe;
+        updatedProbe.status = status;
+        return updatedProbe;
       } else {
         return probe;
       }
     });
+
+    runInAction(() => {
+      this.connectedProbes = updatedProbes;
+    });
+  }
+
+  public setPrevTargetId(prevId: string, shortId: number): void {
+    console.log('Set prev target ID: ', prevId);
+    const updatedProbes = toJS(this.connectedProbes).map((probe) => {
+      if (probe.info.shortId === shortId) {
+        const updatedProbe = probe;
+        updatedProbe.prevTargetId = prevId;
+        return updatedProbe;
+      } else {
+        return probe;
+      }
+    });
+
+    console.log('Prev', toJS(this.connectedProbes));
+    console.log('After', updatedProbes);
 
     runInAction(() => {
       this.connectedProbes = updatedProbes;
@@ -73,7 +93,10 @@ export class ProbeState {
           return newProbe.pid === e.info.pid && newProbe.vid === e.info.vid && e.info.serialNum === newProbe.serialNum;
         })
       ) {
-        this.connectedProbes = [...this.connectedProbes, { status: ProbeStatus.IDLE, info: newProbe }];
+        this.connectedProbes = [
+          ...this.connectedProbes,
+          { status: ProbeStatus.IDLE, info: newProbe, prevTargetId: '' },
+        ];
       }
     }
   }
@@ -85,12 +108,14 @@ export class ProbeState {
 
     const updatedProbes: ProbeDevice[] = [];
     for (const probe of this.connectedProbes.slice()) {
-      try {
-        const target = await identifyTarget(this.targetName, probe.info.vid, probe.info.pid, probe.info.serialNum);
-        updatedProbes.push({ status: ProbeStatus.WAIT, info: probe.info, targetChipId: target.uniqueId });
-      } catch (err) {
-        console.warn(`No target found for probe ${probe.info.shortId}, ${probe.info.serialNum}, error ${err}`);
-        updatedProbes.push({ status: ProbeStatus.IDLE, info: probe.info, targetChipId: undefined });
+      if (probe.status !== ProbeStatus.ERASING && probe.status !== ProbeStatus.FLASHING) {
+        try {
+          const target = await identifyTarget(this.targetName, probe.info.vid, probe.info.pid, probe.info.serialNum);
+          updatedProbes.push({ ...probe, status: ProbeStatus.WAIT, targetChipId: target.uniqueId });
+        } catch (err) {
+          console.warn(`No target found for probe ${probe.info.shortId}, ${probe.info.serialNum}, error ${err}`);
+          updatedProbes.push({ ...probe, status: ProbeStatus.IDLE, targetChipId: undefined });
+        }
       }
     }
 
@@ -101,46 +126,3 @@ export class ProbeState {
 }
 
 export const ProbeStateInstance = new ProbeState();
-
-export const startFirmwareFlashAutoRun = (): void => {
-  autorun(async () => {
-    if (ProbeStateInstance.startState) {
-      for (const probe of toJS(ProbeStateInstance.connectedProbes)) {
-        if (probe.status !== ProbeStatus.IDLE && probe.status !== ProbeStatus.WAIT) {
-          continue;
-        }
-
-        const errHandler = (err: Error) => {
-          ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.ERROR, probe.info.shortId);
-          console.log(err);
-          ProbeStateInstance.setStartState(false);
-        };
-
-        ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.ERASING, probe.info.shortId);
-        eraseTarget(ProbeStateInstance.targetName, probe.info.vid, probe.info.pid, probe.info.serialNum)
-          .then(() => {
-            console.log(`Done erasing for ${probe.info}, target ${probe.targetChipId}`);
-            ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.FLASHING, probe.info.shortId);
-
-            flashFirmwareFile(
-              ProbeStateInstance.firmwarePath,
-              ProbeStateInstance.targetName,
-              ProbeStateInstance.firmwareType as any,
-              probe.info.vid,
-              probe.info.pid,
-              true, // Skip erase as we do erase elsewhere
-              5000, // 5MHz speed
-              probe.info.serialNum,
-            )
-              .then(() => {
-                console.log(`Done flashing for ${probe.info}, target ${probe.targetChipId}`);
-                ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.SUCCESS, probe.info.shortId);
-                ProbeStateInstance.setStartState(false);
-              })
-              .catch((err) => errHandler(err));
-          })
-          .catch((err) => errHandler(err));
-      }
-    }
-  });
-};

@@ -1,20 +1,24 @@
 import { SimpleGrid, VStack } from '@chakra-ui/layout';
-import { Button, ButtonGroup, Container, Input, Stack, Text, Tooltip } from '@chakra-ui/react';
+import { Button, ButtonGroup, Container, Input, Stack, Text, Tooltip, useInterval } from '@chakra-ui/react';
 import { OpenDialogReturnValue } from 'electron';
 import { Observer } from 'mobx-react-lite';
 import path from 'path';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useState } from 'react';
 import { listAllProbes, openFirmwareChooseDialog } from '../common/MainProcessBindings';
 import { MassProdStat } from '../components/MassProdStat';
 import { Probe } from '../components/Probe';
-import { ProbeStateInstance, startFirmwareFlashAutoRun } from '../states/ProbeState';
+import { intervalTickHandler } from '../states/FlashRoutines';
+import { ProbeStateInstance } from '../states/ProbeState';
 
 export const MassProduction = (): JSX.Element => {
   const [firmware, setFirmware] = useState<OpenDialogReturnValue>();
-  useEffect(() => {
-    startFirmwareFlashAutoRun();
-  }, []);
+  const [startState, setStartState] = useState<boolean>(false);
+  useInterval(async () => {
+    if (startState) {
+      await intervalTickHandler();
+    }
+  }, 1000);
 
   const probeState = ProbeStateInstance;
   return (
@@ -111,13 +115,13 @@ export const MassProduction = (): JSX.Element => {
             <Observer>
               {() => (
                 <Button
-                  colorScheme={probeState.startState ? 'red' : 'green'}
+                  colorScheme={startState ? 'red' : 'green'}
                   size="lg"
                   onClick={() => {
-                    probeState.setStartState(!probeState.startState);
+                    setStartState(!startState);
                   }}
                 >
-                  {probeState.startState ? 'Stop' : 'Start'}
+                  {startState ? 'Stop' : 'Start'}
                 </Button>
               )}
             </Observer>

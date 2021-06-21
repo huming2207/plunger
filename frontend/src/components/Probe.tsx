@@ -13,12 +13,13 @@ export const Probe = (params: ProbeDevice): JSX.Element => {
   const shortIdHex = params.info.shortId.toString(16).toUpperCase().padStart(6, '0');
 
   const stateColorLut: ProbeUIColor[] = [
-    { status: ProbeStatus.IDLE, color: 'orange' },
+    { status: ProbeStatus.IDLE, color: 'palegoldenrod' },
     { status: ProbeStatus.WAIT, color: 'orangered' },
     { status: ProbeStatus.ERASING, color: 'burlywood' },
     { status: ProbeStatus.FLASHING, color: 'lightblue' },
     { status: ProbeStatus.SUCCESS, color: 'yellowgreen' },
     { status: ProbeStatus.ERROR, color: 'red' },
+    { status: ProbeStatus.REPEATED, color: 'lightseagreen' },
   ];
 
   const color = stateColorLut.find((obj) => {
