@@ -10,6 +10,7 @@ import {
   Tabs,
 } from '@chakra-ui/react';
 import React from 'react';
+import { Configuration } from './pages/Configuration';
 import { MassProduction } from './pages/MassProduction';
 
 export const App = (): JSX.Element => {
@@ -19,13 +20,15 @@ export const App = (): JSX.Element => {
         <Tabs>
           <TabList>
             <Tab>Mass Production</Tab>
-            <Tab>Single mode</Tab>
+            <Tab>Configuration</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
               <MassProduction />
             </TabPanel>
-            <TabPanel>doi2</TabPanel>
+            <TabPanel>
+              <Configuration />
+            </TabPanel>
           </TabPanels>
         </Tabs>
       </Container>
