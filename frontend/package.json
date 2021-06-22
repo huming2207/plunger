@@ -16,6 +16,7 @@
     "@emotion/react": "^11.4.0",
     "@emotion/styled": "^11.3.0",
     "electron": "^13.1.2",
+    "electron-store": "^8.0.0",
     "framer-motion": "^4.1.17",
     "mobx": "^6.3.2",
     "mobx-react-lite": "^3.2.0",
