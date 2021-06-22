@@ -30,8 +30,6 @@
   },
   "dependencies": {
     "@types/level": "^6.0.0",
-    "ajv": "^6.12.6",
-    "electron-store": "^8.0.0",
     "level": "^7.0.0",
     "plunger-binding": "^1.0.11"
   }
