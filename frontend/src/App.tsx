@@ -1,19 +1,16 @@
-import {
-  Button,
-  ChakraProvider,
-  Container,
-  SimpleGrid,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from '@chakra-ui/react';
-import React from 'react';
+import { ChakraProvider, Container, Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
+import React, { useEffect } from 'react';
 import { Configuration } from './pages/Configuration';
 import { MassProduction } from './pages/MassProduction';
+import { SettingStateInstance } from './states/SettingState';
 
 export const App = (): JSX.Element => {
+  useEffect(() => {
+    (async () => {
+      await SettingStateInstance.initFromDisk();
+    })();
+  }, []);
+
   return (
     <ChakraProvider>
       <Container marginTop="5" marginBottom="5" maxW="container.lg">

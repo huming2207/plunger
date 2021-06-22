@@ -16,7 +16,7 @@ export const identifyTarget = async (
   pid: number,
   serialNum?: string,
 ): Promise<TargetIdentity> => {
-  return ipcRenderer.invoke(InvokeType.IDENTIFY_REQUEST, targetName, vid, pid, serialNum);
+  return await ipcRenderer.invoke(InvokeType.IDENTIFY_REQUEST, targetName, vid, pid, serialNum);
 };
 
 export const eraseTarget = async (targetName: string, vid: number, pid: number, serialNum?: string): Promise<void> => {

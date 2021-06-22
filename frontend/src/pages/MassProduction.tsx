@@ -10,10 +10,12 @@ import { MassProdStat } from '../components/MassProdStat';
 import { Probe } from '../components/Probe';
 import { intervalTickHandler } from '../states/FlashRoutines';
 import { ProbeStateInstance } from '../states/ProbeState';
+import { SettingStateInstance } from '../states/SettingState';
 
 export const MassProduction = (): JSX.Element => {
   const [firmware, setFirmware] = useState<OpenDialogReturnValue>();
   const [startState, setStartState] = useState<boolean>(false);
+
   useInterval(async () => {
     if (startState) {
       await intervalTickHandler();
@@ -48,14 +50,19 @@ export const MassProduction = (): JSX.Element => {
         >
           <Stack direction="row" spacing={5} align="center">
             <Text>Target name:</Text>
-            <Input
-              onChange={(event) => {
-                ProbeStateInstance.setTargetName(event.target.value);
-              }}
-              placeholder="e.g. STM32F103C8Tx"
-              width="xs"
-              maxWidth="sm"
-            ></Input>
+            <Observer>
+              {() => (
+                <Input
+                  onChange={async (event) => {
+                    await SettingStateInstance.setTargetName(event.target.value);
+                  }}
+                  placeholder="e.g. STM32F103C8Tx"
+                  width="xs"
+                  maxWidth="sm"
+                  defaultValue={SettingStateInstance.targetName}
+                ></Input>
+              )}
+            </Observer>
             <Button
               colorScheme="teal"
               variant="solid"
@@ -63,8 +70,8 @@ export const MassProduction = (): JSX.Element => {
                 const result = await openFirmwareChooseDialog();
                 setFirmware(result);
                 if (!result.canceled) {
-                  probeState.setFirmwarePath(result.filePaths[0]);
-                  probeState.setFirmwareType('bin' as any); // TODO: change to actual type
+                  SettingStateInstance.setFirmwarePath(result.filePaths[0]);
+                  SettingStateInstance.setFirmwareType('bin' as any); // TODO: change to actual type
                 }
               }}
             >
@@ -125,6 +132,15 @@ export const MassProduction = (): JSX.Element => {
                 </Button>
               )}
             </Observer>
+            <Button
+              colorScheme="red"
+              onClick={async () => {
+                await SettingStateInstance.setSuccessCount(0);
+                await SettingStateInstance.setFailCount(0);
+              }}
+            >
+              Clear counter
+            </Button>
           </ButtonGroup>
         </Container>
 

@@ -1,33 +1,14 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx';
 import { ProbeDevice, ProbeStatus } from '../common/ProbeTypes';
-import { FirmwareType, Probes } from 'plunger-binding';
+import { Probes } from 'plunger-binding';
 import { identifyTarget } from '../common/MainProcessBindings';
+import { SettingStateInstance } from './SettingState';
 
 export class ProbeState {
-  public targetName = 'STM32F103C8Tx';
-  public firmwareType = '';
-  public startState = false;
-  public firmwarePath = '';
   public connectedProbes: ProbeDevice[] = [];
 
   constructor() {
     makeAutoObservable(this);
-  }
-
-  public setTargetName(targetName: string): void {
-    this.targetName = targetName;
-  }
-
-  public setFirmwarePath(path: string): void {
-    this.firmwarePath = path;
-  }
-
-  public setStartState(state: boolean): void {
-    this.startState = state;
-  }
-
-  public setFirmwareType(type: FirmwareType): void {
-    this.firmwareType = type;
   }
 
   public setProbeStatusByShortId(status: ProbeStatus, shortId: number): void {
@@ -57,9 +38,6 @@ export class ProbeState {
         return probe;
       }
     });
-
-    console.log('Prev', toJS(this.connectedProbes));
-    console.log('After', updatedProbes);
 
     runInAction(() => {
       this.connectedProbes = updatedProbes;
@@ -110,7 +88,14 @@ export class ProbeState {
     for (const probe of this.connectedProbes.slice()) {
       if (probe.status !== ProbeStatus.ERASING && probe.status !== ProbeStatus.FLASHING) {
         try {
-          const target = await identifyTarget(this.targetName, probe.info.vid, probe.info.pid, probe.info.serialNum);
+          console.log('Identify target', SettingStateInstance.targetName);
+          const target = await identifyTarget(
+            SettingStateInstance.targetName,
+            probe.info.vid,
+            probe.info.pid,
+            probe.info.serialNum,
+          );
+          console.log('Target', target);
           updatedProbes.push({ ...probe, status: ProbeStatus.WAIT, targetChipId: target.uniqueId });
         } catch (err) {
           console.warn(`No target found for probe ${probe.info.shortId}, ${probe.info.serialNum}, error ${err}`);
