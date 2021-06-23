@@ -20,7 +20,7 @@ export const MassProduction = (): JSX.Element => {
     if (startState) {
       await intervalTickHandler();
     }
-  }, 1000);
+  }, 5000);
 
   const probeState = ProbeStateInstance;
   return (
@@ -124,6 +124,7 @@ export const MassProduction = (): JSX.Element => {
                 <Button
                   colorScheme={startState ? 'red' : 'green'}
                   size="lg"
+                  disabled={!firmware?.filePaths || firmware.filePaths.length < 1}
                   onClick={() => {
                     setStartState(!startState);
                   }}
@@ -134,6 +135,7 @@ export const MassProduction = (): JSX.Element => {
             </Observer>
             <Button
               colorScheme="red"
+              size="lg"
               onClick={async () => {
                 await SettingStateInstance.setSuccessCount(0);
                 await SettingStateInstance.setFailCount(0);
