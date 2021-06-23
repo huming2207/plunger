@@ -2,10 +2,13 @@ import { toJS } from 'mobx';
 import { eraseTarget, flashFirmwareFile } from '../common/MainProcessBindings';
 import { ProbeDevice, ProbeStatus } from '../common/ProbeTypes';
 import { ProbeStateInstance } from './ProbeState';
+import { SettingStateInstance } from './SettingState';
 
 export const onFirmwareFlashError = (err: Error, probe: ProbeDevice): void => {
-  ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.ERROR, probe.info.shortId);
-  console.log(err);
+  SettingStateInstance.bumpFailCount().then(() => {
+    ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.ERROR, probe.info.shortId);
+    console.log(err);
+  });
 };
 
 export const onEraseAndDownload = async (probe: ProbeDevice): Promise<void> => {
@@ -21,28 +24,31 @@ export const onEraseAndDownload = async (probe: ProbeDevice): Promise<void> => {
   }
 
   ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.ERASING, probe.info.shortId);
-  eraseTarget(ProbeStateInstance.targetName, probe.info.vid, probe.info.pid, probe.info.serialNum)
+  eraseTarget(SettingStateInstance.targetName, probe.info.vid, probe.info.pid, probe.info.serialNum)
     .then(() => {
       console.log(`Done erasing for ${probe.info}, target ${probe.targetChipId}`);
       ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.FLASHING, probe.info.shortId);
+      const maxSpeed = parseInt(SettingStateInstance.maxSpeedKhz);
 
       flashFirmwareFile(
-        ProbeStateInstance.firmwarePath,
-        ProbeStateInstance.targetName,
-        ProbeStateInstance.firmwareType as any,
+        SettingStateInstance.firmwarePath,
+        SettingStateInstance.targetName,
+        SettingStateInstance.firmwareType as any,
         probe.info.vid,
         probe.info.pid,
         true, // Skip erase as we do erase elsewhere
-        5000, // 5MHz speed
+        5000,
         probe.info.serialNum,
       )
         .then(() => {
           console.log(`Done flashing for ${probe.info}, target ${probe.targetChipId}`);
-          ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.SUCCESS, probe.info.shortId);
-          ProbeStateInstance.setPrevTargetId(probe.targetChipId || '', probe.info.shortId);
-          setTimeout(() => {
-            ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.IDLE, probe.info.shortId);
-          }, 2000);
+          SettingStateInstance.bumpSuccessCount().then(() => {
+            ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.SUCCESS, probe.info.shortId);
+            ProbeStateInstance.setPrevTargetId(probe.targetChipId || '', probe.info.shortId);
+            setTimeout(() => {
+              ProbeStateInstance.setProbeStatusByShortId(ProbeStatus.IDLE, probe.info.shortId);
+            }, 2000);
+          });
         })
         .catch((err) => onFirmwareFlashError(err, probe));
     })
